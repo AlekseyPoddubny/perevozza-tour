@@ -10,13 +10,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Filament\Resources\ScheduleResource\Pages;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Actions\Action;
+
 
 class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $modelLabel = 'рейс';
-    protected static ?string $pluralModelLabel = 'расписание';
+    protected static ?string $pluralModelLabel = 'Рейсы';
     protected static ?string $navigationGroup = 'Логистика';
     protected static ?int $navigationSort = 2;
 
@@ -75,21 +78,29 @@ class ScheduleResource extends Resource
                             ->live()
                             ->required(),
 
+// Находим поле departure_at в форме и меняем его настройки
                         Forms\Components\DateTimePicker::make('departure_at')
                             ->label('Дата и время выезда')
-                            ->visible(fn (Get $get) => $get('type') === 'additional')
-                            ->required(fn (Get $get) => $get('type') === 'additional'),
+                            // Поле видно, если:
+                            // 1. Это НЕ регулярный рейс (разовый)
+                            // 2. ИЛИ если мы сейчас находимся на странице редактирования (record !== null)
+                            ->visible(fn (Get $get, $record) => $get('type') === 'additional' || $record !== null)
+                            ->required(fn (Get $get, $record) => ($get('type') === 'additional' || $record !== null)),
 
-                        Forms\Components\Select::make('frequency')
-                            ->label('Периодичность')
-                            ->options([
-                                'daily' => 'Ежедневно',
-                                'weekdays' => 'По будням',
-                                'weekly' => 'Раз в неделю',
-                                'custom' => 'Несколько раз в неделю',
+// А для репитера добавим обратное условие, чтобы он НЕ мешался при редактировании
+                        Forms\Components\Repeater::make('dates_repeater')
+                            ->label('Список дат и времени выезда')
+                            ->schema([
+                                Forms\Components\DateTimePicker::make('departure_at')
+                                    ->label('Дата и время')
+                                    ->required(),
                             ])
-                            ->visible(fn (Get $get) => $get('type') === 'regular')
-                            ->required(fn (Get $get) => $get('type') === 'regular'),
+                            // Репитер виден ТОЛЬКО при создании нового регулярного рейса
+                            ->visible(fn (Get $get, $record) => $get('type') === 'regular' && $record === null)
+                            ->required(fn (Get $get, $record) => $get('type') === 'regular' && $record === null)
+                            ->grid(2)
+                            ->columnSpanFull()
+                            ->addActionLabel('Добавить дату рейса'),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Ресурсы')
@@ -117,42 +128,29 @@ class ScheduleResource extends Resource
                     ->label('ID')
                     ->sortable()
                     ->searchable()
-                    ->fontFamily('mono') // Моноширинный шрифт для ID
+                    ->fontFamily('mono')
                     ->toggledHiddenByDefault(false)
                     ->color('gray'),
 
                 Tables\Columns\TextColumn::make('route.full_path')
                     ->label('Маршрут')
                     ->limit(30)
-                    ->searchable() // Поиск по городам в маршруте
+                    ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('departure_info')
+                Tables\Columns\TextColumn::make('departure_at')
                     ->label('Когда')
-                    ->state(function (Schedule $record): string {
-                        if ($record->type === 'regular') {
-                            return match($record->frequency) {
-                                'daily' => 'Ежедневно',
-                                'weekdays' => 'По будням',
-                                'weekly' => 'Раз в неделю',
-                                'custom' => 'Неск. раз в неделю',
-                                default => 'Регулярно',
-                            };
-                        }
-                        return $record->departure_at?->format('d.m.Y H:i') ?? '—';
-                    })
+                    ->dateTime('d.m.Y H:i')
                     ->badge()
                     ->color(fn (Schedule $record): string => $record->type === 'regular' ? 'info' : 'gray')
-                    ->sortable(['departure_at']), // Сортировка по реальной дате
+                    ->sortable(),
 
-                // Вывод цены в рублях
                 Tables\Columns\TextColumn::make('price_rub')
                     ->label('Цена (₽)')
                     ->money('RUB', divideBy: 1)
                     ->sortable()
                     ->searchable(),
 
-                // Вывод цены в евро
                 Tables\Columns\TextColumn::make('price_eur')
                     ->label('Цена (€)')
                     ->money('EUR', divideBy: 1)

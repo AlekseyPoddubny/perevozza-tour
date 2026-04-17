@@ -28,7 +28,7 @@ class ContactResource extends Resource
                 Forms\Components\TextInput::make('title')->required()->label('Заголовок'),
                 Forms\Components\TextInput::make('subtitle')->label('Подзаголовок/Номер'),
                 Forms\Components\Select::make('category')
-                    ->options(['personal' => 'Личный/Диспетчер', 'group' => 'Группа/Сообщество'])
+                    ->options(['personal' => 'Контакт', 'group' => 'Группа/Сообщество'])
                     ->required()->label('Тип'),
                 Forms\Components\Toggle::make('is_active')->label('Активен')->default(true),
             ])->columns(2),

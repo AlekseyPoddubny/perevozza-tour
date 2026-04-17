@@ -34,10 +34,11 @@ class CityResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->placeholder('Например, Берлин'),
 
-                Forms\Components\Toggle::make('is_main')
-                    ->label('Конечный пункт (показывать в быстром поиске)')
-                    ->default(false)
-                    ->helperText('Если включено, город будет в приоритетном списке при поиске'),
+                Forms\Components\Toggle::make('is_main') // или как оно у тебя называлось
+                    ->label('Пункт сбора пассажиров') // Меняем название здесь
+                    ->helperText('Если включено, город будет отображаться в списке пунктов сбора в карточке рейса')
+                    ->default(true),
+
             ]);
     }
 
@@ -51,7 +52,7 @@ class CityResource extends Resource
                     ->searchable(),
 
                 Tables\Columns\IconColumn::make('is_main')
-                    ->label('Главный')
+                    ->label('Пункт сбора')
                     ->boolean()
                     ->sortable()
                     ->searchable(),

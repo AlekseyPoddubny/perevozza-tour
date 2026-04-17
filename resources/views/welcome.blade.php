@@ -237,7 +237,7 @@
                                          class="flex items-center gap-2 cursor-help w-fit group/info outline-none"
                                          tabindex="0">
                                 <span class="text-[9px] text-gold/60 font-medium uppercase tracking-tighter">
-                                    через {{ $middleCitiesCount }} {{ trans_choice('город|города|городов', $middleCitiesCount, [], 'ru') }}
+                                    пункты сбора
                                 </span>
                                         <svg class="w-3.5 h-3.5 text-gold/40 group-hover/info:text-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -258,11 +258,7 @@
                         <div>
                             <p class="text-[10px] text-gray-500 uppercase">Выезд</p>
                             <p class="text-[11px] font-semibold">
-                                @if($schedule->type === 'regular')
-                                    {{ match($schedule->frequency) { 'daily' => 'Ежедневно', 'weekdays' => 'По будням', 'weekly' => 'Раз в неделю', default => 'Регулярно' } }}
-                                @else
-                                    {{ $schedule->departure_at ? \Carbon\Carbon::parse($schedule->departure_at)->translatedFormat('d.m.Y H:i') : 'Уточняйте' }}
-                                @endif
+                                {{ $schedule->departure_at ? \Carbon\Carbon::parse($schedule->departure_at)->translatedFormat('d.m.Y H:i') : 'Уточняйте' }}
                             </p>
                         </div>
                         <div>
@@ -278,15 +274,21 @@
                          class="absolute bottom-[76px] left-6 right-6 z-50 pointer-events-none"
                          style="display: none;">
                         <div class="bg-black/95 border border-gold/30 rounded-xl p-4 shadow-2xl backdrop-blur-md">
-                            <p class="text-gold/50 text-[8px] uppercase font-bold mb-3 tracking-widest border-b border-white/5 pb-2 text-center">Промежуточные остановки</p>
+                            <p class="text-gold/50 text-[8px] uppercase font-bold mb-3 tracking-widest border-b border-white/5 pb-2 text-center">
+                                Пункты сбора
+                            </p>
                             <div class="space-y-2">
-                                @foreach($cities as $city)
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-1 h-1 rounded-full {{ $loop->first || $loop->last ? 'bg-gold' : 'bg-gold/30' }}"></div>
-                                        <p class="text-[10px] font-bold uppercase {{ $loop->first || $loop->last ? 'text-gold' : 'text-zinc-300' }}">
-                                            {{ $city }}
-                                        </p>
-                                    </div>
+                                {{-- Берем города напрямую из связи маршрута рейса --}}
+                                @foreach($schedule->route->cities as $city)
+                                    {{-- Проверяем новое условие: является ли город пунктом сбора --}}
+                                    @if($city->is_main)
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-1 h-1 rounded-full {{ $loop->first || $loop->last ? 'bg-gold' : 'bg-gold/30' }}"></div>
+                                            <p class="text-[10px] font-bold uppercase {{ $loop->first || $loop->last ? 'text-gold' : 'text-zinc-300' }}">
+                                                {{ $city->name }} {{-- Обязательно ->name, так как теперь это объект --}}
+                                            </p>
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
