@@ -133,7 +133,7 @@
     @endif
 
     <div class="max-w-4xl w-full px-4 relative z-10 flex justify-center">
-        <img src="{{ asset('images/hero-van.png') }}" alt="Van" class="w-full h-auto max-h-[420px] object-contain ">
+        <img src="{{ asset('images/hero-van.webp') }}" alt="Van" class="w-full h-auto max-h-[420px] object-contain ">
     </div>
 
     <div class="text-center mt-12 mb-12 space-y-5 px-4 z-10 relative">

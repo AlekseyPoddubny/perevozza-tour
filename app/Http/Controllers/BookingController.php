@@ -125,9 +125,7 @@ class BookingController extends Controller
         $schedule = \App\Models\Schedule::find($validated['schedule_id']);
 
         // Форматируем дату. Если рейс регулярный, можно добавить пометку
-        $dateInfo = $schedule->departure_at
-            ? \Carbon\Carbon::parse($schedule->departure_at)->translatedFormat('d.m.Y H:i')
-            : ($schedule->type === 'regular' ? 'Регулярный рейс' : 'Уточнить у оператора');
+        $dateInfo = \Carbon\Carbon::parse($schedule->departure_at)->translatedFormat('d.m.Y H:i');
 
         // 3. Формируем текст сообщения для Telegram
         $text = "🆕 *НОВАЯ БРОНЬ*\n\n" .
@@ -140,15 +138,24 @@ class BookingController extends Controller
             "💳 *ID РЕЙСА:* #{$validated['schedule_id']}";
 
         // 4. Отправка в Telegram
-        try {
-            \Illuminate\Support\Facades\Http::timeout(5)->post("https://api.telegram.org/bot" . env('TELEGRAM_BOT_TOKEN') . "/sendMessage", [
-                'chat_id'    => env('TELEGRAM_ADMIN_CHAT_ID'),
-                'text'       => $text,
-                'parse_mode' => 'Markdown',
-            ]);
-        } catch (\Exception $e) {
-            \Log::error("Ошибка отправки в Telegram: " . $e->getMessage());
-        }
+try {
+    $response = \Illuminate\Support\Facades\Http::timeout(10)->post(
+        'https://api.telegram.org/bot' . config('services.telegram.bot_token') . '/sendMessage',
+        [
+            'chat_id' => config('services.telegram.admin_chat_id'),
+            'text' => $text,
+        ]
+    );
+
+    if (! $response->successful()) {
+        \Log::error('Telegram send failed', [
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
+    }
+} catch (\Throwable $e) {
+    \Log::error('Ошибка отправки в Telegram: ' . $e->getMessage());
+}
 
         return back()->with('success', 'Спасибо! Ваш запрос принят, мы свяжемся с вами в ближайшее время.');
     }

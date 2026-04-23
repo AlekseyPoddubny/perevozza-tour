@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 
 class BookingResource extends Resource
 {
@@ -92,6 +93,11 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('schedule.id')
                     ->label('ID рейса')
                     ->sortable(),
+
+TextColumn::make('schedule.departure_at')
+    ->label('Дата рейса')
+    ->dateTime('d.m.Y H:i')
+    ->sortable(),
 
                 // Выводим полный путь маршрута в таблицу
                 // app/Filament/Resources/BookingResource.php
