@@ -39,6 +39,13 @@ class DriverResource extends Resource
                 ->label('Дополнительная информация')
                 ->placeholder('Стаж, категории, примечания...')
                 ->columnSpanFull(),
+            Forms\Components\FileUpload::make('photo')
+                ->label('Фото')
+                ->image()
+                ->directory('drivers')
+                ->disk('public')
+                ->visibility('public')
+                ->imageEditor(),
             Forms\Components\Toggle::make('is_active')
                 ->label('Работает')
                 ->default(true),

@@ -11,6 +11,7 @@ class Contact extends Model
         'subtitle',
         'category',
         'sort_order',
+        'photo',
         'is_active'
     ];
 

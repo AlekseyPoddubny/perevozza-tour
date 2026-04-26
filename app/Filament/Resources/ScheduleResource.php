@@ -174,7 +174,7 @@ class ScheduleResource extends Resource
                         'cancelled' => 'Отменен',
                     }),
             ])
-            ->defaultSort('id', 'desc')
+            ->defaultSort('departure_at', 'asc')
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->label('Тип рейса')

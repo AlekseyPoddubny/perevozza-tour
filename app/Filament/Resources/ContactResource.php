@@ -30,6 +30,13 @@ class ContactResource extends Resource
                 Forms\Components\Select::make('category')
                     ->options(['personal' => 'Контакт', 'group' => 'Группа/Сообщество'])
                     ->required()->label('Тип'),
+                Forms\Components\FileUpload::make('photo')
+                    ->label('Фото')
+                    ->image()
+                    ->directory('contacts')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageEditor(),
                 Forms\Components\Toggle::make('is_active')->label('Активен')->default(true),
             ])->columns(2),
 

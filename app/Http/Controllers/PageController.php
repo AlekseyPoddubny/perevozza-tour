@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+
 class PageController extends Controller
 {
     public function show($slug)
@@ -15,6 +16,10 @@ class PageController extends Controller
         // Загружаем данные для страницы "О нас"
         if ($slug === 'about') {
             $data['vehicles'] = \App\Models\Vehicle::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get();
+
+            $data['drivers'] = \App\Models\Driver::where('is_active', true)
                 ->orderBy('sort_order')
                 ->get();
 
